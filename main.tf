@@ -179,3 +179,4 @@ output "website_url" {
   description = "Acme development website"
   value       = "http://${aws_instance.web.public_ip}"
 }
+# Trigger HCP Terraform infrastructure provisioning
