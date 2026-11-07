@@ -1,3 +1,4 @@
+
 terraform {
   required_providers {
     aws = {
@@ -7,7 +8,6 @@ terraform {
   }
 }
 
-# AWS Provider
 provider "aws" {
   region = "us-east-1"
 
@@ -15,58 +15,44 @@ provider "aws" {
     tags = {
       owner       = "acme-dev-team"
       environment = "dev"
-      cost_center = "engineering"
       managed_by  = "terraform"
       project     = "acme-self-service"
     }
   }
 }
 
-# Verify AWS Authentication
+# Verify AWS authentication
 data "aws_caller_identity" "current" {}
 
-# ==========================================
-# STAGE 1: NETWORK PROVISIONING
-# ==========================================
-
-# Create VPC
-resource "aws_vpc" "acme" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+# Provision an S3 bucket
+resource "aws_s3_bucket" "acme_demo" {
+  bucket_prefix = "acme-self-service-demo-"
 
   tags = {
-    Name = "acme-dev-vpc"
+    Name = "Acme Self-Service Demo"
   }
 }
 
-# Create Public Subnet
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.acme.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
+# Prevent public access
+resource "aws_s3_bucket_public_access_block" "acme_demo" {
+  bucket = aws_s3_bucket.acme_demo.id
 
-  tags = {
-    Name = "acme-dev-public-subnet"
-  }
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-# ==========================================
-# OUTPUTS
-# ==========================================
-
+# Display the AWS account
 output "aws_account_id" {
-  description = "AWS account connected to HCP Terraform"
-  value       = data.aws_caller_identity.current.account_id
+  value = data.aws_caller_identity.current.account_id
 }
 
-output "vpc_id" {
-  description = "ID of the provisioned Acme VPC"
-  value       = aws_vpc.acme.id
+# Display the created bucket
+output "s3_bucket_name" {
+  value = aws_s3_bucket.acme_demo.id
 }
 
-output "subnet_id" {
-  description = "ID of the provisioned public subnet"
-  value       = aws_subnet.public.id
+output "s3_bucket_region" {
+  value = aws_s3_bucket.acme_demo.region
 }
