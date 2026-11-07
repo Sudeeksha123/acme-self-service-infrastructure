@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     aws = {
@@ -9,31 +8,22 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
-
-  default_tags {
-    tags = {
-      owner       = "acme-dev-team"
-      environment = "dev"
-      managed_by  = "terraform"
-      project     = "acme-self-service"
-    }
-  }
+  region = "us-east-2"
 }
 
-# Verify AWS authentication
 data "aws_caller_identity" "current" {}
 
-# Provision an S3 bucket
 resource "aws_s3_bucket" "acme_demo" {
   bucket_prefix = "acme-self-service-demo-"
 
   tags = {
-    Name = "Acme Self-Service Demo"
+    Name        = "Acme Demo Storage"
+    Environment = "dev"
+    ManagedBy   = "Terraform"
+    Project     = "acme-self-service"
   }
 }
 
-# Prevent public access
 resource "aws_s3_bucket_public_access_block" "acme_demo" {
   bucket = aws_s3_bucket.acme_demo.id
 
@@ -43,16 +33,10 @@ resource "aws_s3_bucket_public_access_block" "acme_demo" {
   restrict_public_buckets = true
 }
 
-# Display the AWS account
 output "aws_account_id" {
   value = data.aws_caller_identity.current.account_id
 }
 
-# Display the created bucket
 output "s3_bucket_name" {
-  value = aws_s3_bucket.acme_demo.id
-}
-
-output "s3_bucket_region" {
-  value = aws_s3_bucket.acme_demo.region
+  value = aws_s3_bucket.acme_demo.bucket
 }
