@@ -1,3 +1,4 @@
+
 terraform {
   required_providers {
     aws = {
@@ -13,6 +14,7 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+# S3 bucket for ACME self-service provisioning
 resource "aws_s3_bucket" "acme_demo" {
   bucket_prefix = "acme-self-service-demo-"
 
@@ -21,9 +23,12 @@ resource "aws_s3_bucket" "acme_demo" {
     Environment = "dev"
     ManagedBy   = "Terraform"
     Project     = "acme-self-service"
+    Owner       = "Platform-Team"
+    CostCenter  = "Engineering"
   }
 }
 
+# Prevent public access to the S3 bucket
 resource "aws_s3_bucket_public_access_block" "acme_demo" {
   bucket = aws_s3_bucket.acme_demo.id
 
@@ -57,10 +62,10 @@ data "aws_ami" "acme_linux" {
   }
 }
 
-# Provision Acme development server
+# Provision ACME development server
 resource "aws_instance" "acme_dev" {
   ami           = data.aws_ami.acme_linux.id
-  instance_type = "t3.large"
+  instance_type = "t3.micro"
 
   # Reuse existing AWS networking
   subnet_id = "subnet-00d25d7f3eef41262"
@@ -73,7 +78,8 @@ resource "aws_instance" "acme_dev" {
     Environment = "dev"
     Project     = "acme-self-service"
     ManagedBy   = "terraform"
-    DemoTest = "tag-policy-test"
+    Owner       = "Platform-Team"
+    CostCenter  = "Engineering"
   }
 }
 
