@@ -73,6 +73,7 @@ resource "aws_instance" "acme_dev" {
     Environment = "dev"
     Project     = "acme-self-service"
     ManagedBy   = "terraform"
+    DemoTest = "tag-policy-test"
   }
 }
 
