@@ -60,7 +60,7 @@ data "aws_ami" "acme_linux" {
 # Provision Acme development server
 resource "aws_instance" "acme_dev" {
   ami           = data.aws_ami.acme_linux.id
-  instance_type = "t3.micro"
+  instance_type = "t3.large"
 
   # Reuse existing AWS networking
   subnet_id = "subnet-00d25d7f3eef41262"
